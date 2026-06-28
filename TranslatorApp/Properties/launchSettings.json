@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "TranslatorApp": {
+      "commandName": "Project",
+      "nativeDebugging": true,
+      "hotReloadEnabled": false
+    }
+  }
+}

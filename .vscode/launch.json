@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "启动调试 (F5)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}\\TranslatorApp\\bin\\Debug\\net8.0-windows\\TranslatorApp.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}\\TranslatorApp",
+      "console": "internalConsole",
+      "stopAtEntry": false,
+      "env": {
+        "PATH": "E:\\Software\\NET8;${env:PATH}"
+      }
+    },
+    {
+      "name": "附加到进程",
+      "type": "coreclr",
+      "request": "attach",
+      "processId": "${command:pickProcess}"
+    }
+  ]
+}

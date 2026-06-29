@@ -79,20 +79,31 @@ public class MainForm : Form
         if (m.Msg == HotkeyManager.WM_HOTKEY && m.WParam.ToInt32() == HotkeyManager.ID_TRANSLATE_INPUT)
         {
             ShowInputForm();
+            return;
         }
+
+        if (m.Msg == 0x0112 && _config.ShowInTaskbar) // WM_SYSCOMMAND
+        {
+            var cmd = m.WParam.ToInt32() & 0xFFF0;
+            if (cmd == 0xF120) // SC_RESTORE
+            {
+                BeginInvoke(new Action(ToggleTaskbarClick));
+                return;
+            }
+        }
+
         base.WndProc(ref m);
     }
 
-    protected override void OnActivated(EventArgs e)
+    private void ToggleTaskbarClick()
     {
-        base.OnActivated(e);
-        if (_config.ShowInTaskbar)
+        if (_inputForm != null && !_inputForm.IsDisposed && _inputForm.Visible)
         {
-            BeginInvoke(new Action(() =>
-            {
-                ShowInputForm();
-                WindowState = FormWindowState.Minimized;
-            }));
+            _inputForm.Hide();
+        }
+        else
+        {
+            ShowInputForm();
         }
     }
 

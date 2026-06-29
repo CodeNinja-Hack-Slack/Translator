@@ -14,6 +14,14 @@ public class MainForm : Form
     private SettingsForm? _settingsForm;
 
     public TranslationService Translator => _translator;
+    public bool IsTaskbarMode => _config.ShowInTaskbar;
+
+    public void SetTaskbarMode(bool show)
+    {
+        _config.ShowInTaskbar = show;
+        ApplyIconMode();
+        ConfigManager.Save(_config);
+    }
 
     public MainForm()
     {
@@ -33,6 +41,7 @@ public class MainForm : Form
         ConfigManager.ConfigChanged += OnConfigChanged;
 
         RegisterHotkey();
+        ApplyIconMode();
 
         BeginInvoke(new Action(() =>
             _tray.ShowNotification("Translator 已启动", "按快捷键呼出翻译窗口", 2000)));
@@ -40,7 +49,28 @@ public class MainForm : Form
 
     protected override void SetVisibleCore(bool value)
     {
-        base.SetVisibleCore(false);
+        if (_config is { ShowInTaskbar: true })
+            base.SetVisibleCore(value);
+        else
+            base.SetVisibleCore(false);
+    }
+
+    private void ApplyIconMode()
+    {
+        if (_config.ShowInTaskbar)
+        {
+            ShowInTaskbar = true;
+            FormBorderStyle = FormBorderStyle.Sizable;
+            if (IsHandleCreated) RecreateHandle();
+            if (!Visible) Show();
+            WindowState = FormWindowState.Minimized;
+        }
+        else
+        {
+            ShowInTaskbar = false;
+            FormBorderStyle = FormBorderStyle.SizableToolWindow;
+            if (Visible) Hide();
+        }
     }
 
     protected override void WndProc(ref Message m)
@@ -52,9 +82,17 @@ public class MainForm : Form
         base.WndProc(ref m);
     }
 
-    protected override void OnLoad(EventArgs e)
+    protected override void OnActivated(EventArgs e)
     {
-        base.OnLoad(e);
+        base.OnActivated(e);
+        if (_config.ShowInTaskbar)
+        {
+            BeginInvoke(new Action(() =>
+            {
+                ShowInputForm();
+                WindowState = FormWindowState.Minimized;
+            }));
+        }
     }
 
     private void RegisterHotkey()
@@ -107,6 +145,7 @@ public class MainForm : Form
     private void OnConfigChanged()
     {
         ConfigManager.Save(_config);
+        ApplyIconMode();
     }
 
     private void Exit()

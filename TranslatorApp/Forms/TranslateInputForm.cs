@@ -1,6 +1,4 @@
 using TranslatorApp.Helpers;
-using TranslatorApp.Models;
-using TranslatorApp.Services;
 
 namespace TranslatorApp.Forms;
 
@@ -10,12 +8,13 @@ public class TranslateInputForm : Form
     private readonly Button _translateButton;
     private readonly Label _resultLabel;
     private readonly Label _sourceLabel;
+    private readonly CheckBox _taskbarCheck;
 
     public TranslateInputForm()
     {
         Text = "Translator - 中英翻译";
-        Size = new Size(520, 380);
-        MinimumSize = new Size(400, 300);
+        Size = new Size(520, 420);
+        MinimumSize = new Size(400, 340);
         StartPosition = FormStartPosition.CenterScreen;
         FormBorderStyle = FormBorderStyle.Sizable;
         ShowIcon = false;
@@ -61,7 +60,18 @@ public class TranslateInputForm : Form
             AutoEllipsis = true
         };
 
-        Controls.AddRange(new Control[] { _sourceLabel, _inputBox, _translateButton, _resultLabel });
+        _taskbarCheck = new CheckBox
+        {
+            Text = "在任务栏显示图标",
+            Location = new Point(14, 346),
+            Size = new Size(180, 24),
+            Font = new Font("Microsoft YaHei", 9),
+            Anchor = AnchorStyles.Bottom | AnchorStyles.Left
+        };
+        _taskbarCheck.CheckedChanged += (_, _) =>
+            Program.MainFormRef?.SetTaskbarMode(_taskbarCheck.Checked);
+
+        Controls.AddRange(new Control[] { _sourceLabel, _inputBox, _translateButton, _resultLabel, _taskbarCheck });
 
         _translateButton.Click += async (_, _) => await DoTranslate();
         _inputBox.KeyDown += (_, e) =>
@@ -73,7 +83,12 @@ public class TranslateInputForm : Form
             }
         };
 
-        Load += (_, _) => _inputBox.Focus();
+        Load += (_, _) =>
+        {
+            _inputBox.Focus();
+            if (Program.MainFormRef != null)
+                _taskbarCheck.Checked = Program.MainFormRef.IsTaskbarMode;
+        };
     }
 
     public void UpdateHotkeyHint(string hotkeyText)

@@ -12,6 +12,7 @@ public class SettingsForm : Form
     private readonly TextBox _youdaoKeyBox;
     private readonly Button _hotkeyButton;
     private readonly NumericUpDown _durationUpDown;
+    private readonly CheckBox _showInTaskbarCheck;
     private readonly AppConfig _config;
 
     private bool _listeningForHotkey;
@@ -89,7 +90,18 @@ public class SettingsForm : Form
         _hotkeyButton.Click += HotkeyButton_Click;
         groupHotkey.Controls.Add(_hotkeyButton);
 
-        y += 60;
+        y += 55;
+        _showInTaskbarCheck = new CheckBox
+        {
+            Text = "在任务栏显示图标",
+            Location = new Point(14, y),
+            Size = new Size(200, 24),
+            Checked = config.ShowInTaskbar,
+            Font = new Font("Microsoft YaHei", 9)
+        };
+        Controls.Add(_showInTaskbarCheck);
+
+        y += 30;
         Controls.Add(new Label { Text = "通知时长 (毫秒):", Location = new Point(14, y + 4), Size = new Size(110, 20) });
         _durationUpDown = new NumericUpDown
         {
@@ -152,6 +164,7 @@ public class SettingsForm : Form
         _config.YoudaoAppId = _youdaoAppIdBox.Text.Trim();
         _config.YoudaoSecretKey = _youdaoKeyBox.Text.Trim();
         _config.NotificationDurationMs = (int)_durationUpDown.Value;
+        _config.ShowInTaskbar = _showInTaskbarCheck.Checked;
 
         ConfigManager.Save(_config);
         ConfigManager.OnConfigChanged();

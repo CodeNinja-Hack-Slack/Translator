@@ -8,6 +8,7 @@
 
 [Setup]
 AppName={#MyAppName}
+AppVerName={#MyAppName}
 AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
@@ -29,7 +30,7 @@ Name: "desktopicon"; Description: "创建桌面快捷方式"; GroupDescription: 
 Name: "startup"; Description: "开机自动启动"; GroupDescription: "启动选项:"; Flags: checkedonce
 
 [Files]
-Source: "build-fd\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

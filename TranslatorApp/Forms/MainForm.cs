@@ -32,6 +32,7 @@ public class MainForm : Form
         _config = ConfigManager.Load();
         _translator = new TranslationService(_config);
         _hotkeys = new HotkeyManager(Handle);
+        Icon = TrayIcon.GenerateIcon(32);
 
         _tray = new TrayIcon();
         _tray.ShowClicked += (_, _) => ShowInputForm();

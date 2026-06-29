@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 
 namespace TranslatorApp.Helpers;
@@ -52,14 +53,23 @@ public class TrayIcon : IDisposable
         var bitmap = new Bitmap(16, 16);
         using var g = Graphics.FromImage(bitmap);
         g.Clear(Color.Transparent);
-
-        using var brush = new SolidBrush(Color.DodgerBlue);
-        g.FillRectangle(brush, 0, 0, 16, 16);
-
-        using var font = new Font("Segoe UI", 8, FontStyle.Bold);
-        using var textBrush = new SolidBrush(Color.White);
+        g.SmoothingMode = SmoothingMode.AntiAlias;
         g.TextRenderingHint = TextRenderingHint.AntiAlias;
-        g.DrawString("译", font, textBrush, 0, -1);
+
+        using var brush = new LinearGradientBrush(
+            new Point(0, 0), new Point(16, 16),
+            Color.FromArgb(0, 130, 230),
+            Color.FromArgb(0, 60, 160));
+        g.FillEllipse(brush, 0, 0, 16, 16);
+
+        using var font = new Font("Microsoft YaHei", 9, FontStyle.Bold);
+        using var textBrush = new SolidBrush(Color.White);
+        using var format = new StringFormat
+        {
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center
+        };
+        g.DrawString("译", font, textBrush, new RectangleF(0, 0, 16, 16), format);
 
         var hIcon = bitmap.GetHicon();
         return Icon.FromHandle(hIcon);

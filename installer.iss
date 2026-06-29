@@ -2,14 +2,12 @@
 ; 使用 Inno Setup 6 编译
 
 #define MyAppName "Translator"
-#define MyAppVersion "1.0"
 #define MyAppPublisher "Translator"
 #define MyAppURL "https://github.com/translator"
 #define MyAppExeName "TranslatorApp.exe"
 
 [Setup]
 AppName={#MyAppName}
-AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}

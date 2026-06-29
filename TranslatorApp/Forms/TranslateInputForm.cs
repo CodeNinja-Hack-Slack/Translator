@@ -1,5 +1,6 @@
 using TranslatorApp.Helpers;
 using TranslatorApp.Models;
+using System.Diagnostics;
 
 namespace TranslatorApp.Forms;
 
@@ -10,6 +11,7 @@ public class TranslateInputForm : Form
 
     private readonly TextBox _inputBox;
     private readonly Button _translateButton;
+    private Button _copyButton = null!;
     private readonly Label _resultLabel;
     private readonly Label _sourceLabel;
     private readonly LinkLabel _settingsLink;
@@ -35,7 +37,7 @@ public class TranslateInputForm : Form
         _config = ConfigManager.Load();
 
         Text = "Translator - 中英翻译";
-        Size = new Size(520, CompactHeight);
+        Size = new Size(600, CompactHeight);
         MinimumSize = new Size(480, CompactHeight);
         StartPosition = FormStartPosition.CenterScreen;
         FormBorderStyle = FormBorderStyle.Sizable;
@@ -56,19 +58,48 @@ public class TranslateInputForm : Form
         _inputBox = new TextBox
         {
             Location = new Point(14, 34),
-            Size = new Size(400, 26),
+            Size = new Size(340, 26),
             Font = new Font("Microsoft YaHei", 11),
-            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+            Anchor = AnchorStyles.Top | AnchorStyles.Left
         };
+
+        var buttonPanel = new Panel
+        {
+            Location = new Point(364, 33),
+            Size = new Size(180, 28),
+            Anchor = AnchorStyles.Top | AnchorStyles.Right
+        };
+
+        _copyButton = new Button
+        {
+            Text = "复制",
+            Location = new Point(0, 0),
+            Size = new Size(84, 28),
+            Font = new Font("Microsoft YaHei", 10),
+            UseVisualStyleBackColor = false,
+            FlatStyle = FlatStyle.Flat,
+            Padding = Padding.Empty,
+            TextAlign = ContentAlignment.MiddleCenter
+        };
+        _copyButton.FlatAppearance.BorderSize = 1;
 
         _translateButton = new Button
         {
             Text = "翻译",
-            Location = new Point(424, 33),
-            Size = new Size(80, 28),
+            Location = new Point(90, 0),
+            Size = new Size(84, 28),
             Font = new Font("Microsoft YaHei", 10),
-            Anchor = AnchorStyles.Top | AnchorStyles.Right
+            UseVisualStyleBackColor = false,
+            FlatStyle = FlatStyle.Flat,
+            Padding = Padding.Empty,
+            TextAlign = ContentAlignment.MiddleCenter
         };
+        _translateButton.FlatAppearance.BorderSize = 1;
+
+        buttonPanel.Controls.Add(_copyButton);
+        buttonPanel.Controls.Add(_translateButton);
+
+        _copyButton.Enabled = false;
 
         _resultLabel = new Label
         {
@@ -85,7 +116,7 @@ public class TranslateInputForm : Form
         _settingsLink = new LinkLabel
         {
             Text = "设置",
-            Location = new Point(466, 8),
+            Location = new Point(546, 8),
             Size = new Size(36, 18),
             LinkColor = Color.Gray,
             ActiveLinkColor = Color.DimGray,
@@ -94,6 +125,7 @@ public class TranslateInputForm : Form
         _settingsLink.LinkClicked += (_, _) => ToggleSettings();
 
         _translateButton.Click += async (_, _) => await DoTranslate();
+        _copyButton.Click += async (_, _) => await CopyResult();
         _inputBox.KeyDown += (_, e) =>
         {
             if (e.KeyCode == Keys.Enter && !e.Shift)
@@ -105,7 +137,7 @@ public class TranslateInputForm : Form
 
         Controls.Add(_sourceLabel);
         Controls.Add(_inputBox);
-        Controls.Add(_translateButton);
+        Controls.Add(buttonPanel);
         Controls.Add(_resultLabel);
         Controls.Add(_settingsLink);
 
@@ -356,15 +388,18 @@ public class TranslateInputForm : Form
 
         _resultLabel.Text = "翻译中...";
         _translateButton.Enabled = false;
+        _copyButton.Enabled = false;
 
         try
         {
             var result = await Program.MainFormRef?.TranslateText(text)!;
             _resultLabel.Text = result;
+            _copyButton.Enabled = !string.IsNullOrEmpty(result);
         }
         catch (Exception ex)
         {
             _resultLabel.Text = $"错误: {ex.Message}";
+            _copyButton.Enabled = false;
         }
         finally
         {
@@ -372,5 +407,82 @@ public class TranslateInputForm : Form
             _inputBox.Focus();
             _inputBox.SelectAll();
         }
+    }
+
+    private async Task CopyResult()
+    {
+        string? text = null;
+        bool shouldCopy = false;
+
+        try
+        {
+            text = _resultLabel.Text;
+            var len = text?.Length ?? 0;
+            var isEmpty = string.IsNullOrEmpty(text);
+            var startsError = text != null && text.StartsWith("错误:");
+            Debug.WriteLine($"[Copy] Text='{text}', Len={len}, Empty={isEmpty}, Error={startsError}");
+
+            shouldCopy = !isEmpty && !text!.Equals("翻译中...") && !startsError;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[Copy] Read text exception: {ex.GetType().Name}: {ex.Message}");
+        }
+
+        if (!shouldCopy || text == null)
+        {
+            Debug.WriteLine("[Copy] Skipped - invalid text");
+            _copyButton.Text = "无内容";
+            await Task.Delay(800);
+            _copyButton.Text = "复制";
+            return;
+        }
+
+        bool success = false;
+
+        if (InvokeRequired)
+        {
+            Debug.WriteLine("[Copy] InvokeRequired - using Invoke");
+            success = (bool)Invoke(new Func<bool>(() => CopyToClipboard(text)));
+        }
+        else
+        {
+            success = CopyToClipboard(text);
+        }
+
+        _copyButton.Text = success ? "已复制 ✓" : "失败";
+        Debug.WriteLine($"[Copy] Result: {success}");
+
+        await Task.Delay(1000);
+        _copyButton.Text = "复制";
+    }
+
+    private bool CopyToClipboard(string text)
+    {
+        try
+        {
+            Clipboard.SetText(text, TextDataFormat.UnicodeText);
+            Debug.WriteLine("[Copy] SetText succeeded");
+            return true;
+        }
+        catch (Exception ex1)
+        {
+            Debug.WriteLine($"[Copy] SetText failed: {ex1.GetType().Name}: {ex1.Message}");
+        }
+
+        try
+        {
+            var data = new DataObject();
+            data.SetData(DataFormats.UnicodeText, text);
+            Clipboard.SetDataObject(data, true);
+            Debug.WriteLine("[Copy] SetDataObject succeeded");
+            return true;
+        }
+        catch (Exception ex2)
+        {
+            Debug.WriteLine($"[Copy] SetDataObject failed: {ex2.GetType().Name}: {ex2.Message}");
+        }
+
+        return false;
     }
 }

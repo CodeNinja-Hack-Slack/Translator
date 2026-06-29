@@ -19,7 +19,7 @@ SolidCompression=yes
 OutputDir=installer
 OutputBaseFilename=Translator_Setup
 PrivilegesRequired=admin
-SetupIconFile=
+SetupIconFile=TranslatorApp\app.ico
 DisableProgramGroupPage=no
 DisableReadyPage=no
 

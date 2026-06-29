@@ -1,67 +1,11 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Drawing.Text;
 using System.Runtime.InteropServices;
 
 namespace TranslatorApp.Helpers;
 
-public class TrayIcon : IDisposable
+public static class IconHelper
 {
-    private readonly NotifyIcon _notifyIcon;
-    private readonly ContextMenuStrip _menu;
-
-    public event EventHandler? ShowClicked;
-    public event EventHandler? SettingsClicked;
-    public event EventHandler? HideClicked;
-    public event EventHandler? ExitClicked;
-
-    public NotifyIcon NotifyIcon => _notifyIcon;
-
-    public TrayIcon()
-    {
-        _notifyIcon = new NotifyIcon
-        {
-            Icon = CreateIcon(),
-            Text = "Translator - 中英翻译",
-            Visible = true
-        };
-
-        _menu = new ContextMenuStrip();
-
-        var miShow = _menu.Items.Add("打开翻译");
-        miShow.Font = new Font("Microsoft YaHei", 9, FontStyle.Bold);
-        miShow.Click += (_, _) => ShowClicked?.Invoke(this, EventArgs.Empty);
-
-        _menu.Items.Add(new ToolStripSeparator());
-
-        var miSettings = _menu.Items.Add("设置...");
-        miSettings.Click += (_, _) => SettingsClicked?.Invoke(this, EventArgs.Empty);
-
-        _menu.Items.Add(new ToolStripSeparator());
-
-        var miHide = _menu.Items.Add("隐藏");
-        miHide.Click += (_, _) => HideClicked?.Invoke(this, EventArgs.Empty);
-
-        _menu.Items.Add(new ToolStripSeparator());
-
-        var miExit = _menu.Items.Add("完全退出");
-        miExit.Click += (_, _) => ExitClicked?.Invoke(this, EventArgs.Empty);
-
-        _notifyIcon.ContextMenuStrip = _menu;
-    }
-
-    public void SetVisible(bool visible)
-    {
-        _notifyIcon.Visible = visible;
-    }
-
-    public void ShowNotification(string title, string text, int durationMs = 3000)
-    {
-        _notifyIcon.ShowBalloonTip(durationMs, title, text, ToolTipIcon.Info);
-    }
-
-    private static Icon CreateIcon() => GenerateIcon(16);
-
     [DllImport("user32.dll")]
     private static extern bool DestroyIcon(IntPtr hIcon);
 
@@ -71,7 +15,7 @@ public class TrayIcon : IDisposable
         using var g = Graphics.FromImage(bitmap);
         g.Clear(Color.Transparent);
         g.SmoothingMode = SmoothingMode.HighQuality;
-        g.TextRenderingHint = TextRenderingHint.AntiAlias;
+        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
         g.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
         var s = (float)size;
@@ -113,12 +57,5 @@ public class TrayIcon : IDisposable
         var owned = (Icon)icon.Clone();
         DestroyIcon(hIcon);
         return owned;
-    }
-
-    public void Dispose()
-    {
-        _notifyIcon.Visible = false;
-        _notifyIcon.Dispose();
-        _menu.Dispose();
     }
 }

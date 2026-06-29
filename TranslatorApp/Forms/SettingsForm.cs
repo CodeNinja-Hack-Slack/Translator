@@ -13,6 +13,7 @@ public class SettingsForm : Form
     private readonly Button _hotkeyButton;
     private readonly NumericUpDown _durationUpDown;
     private readonly CheckBox _showInTaskbarCheck;
+    private readonly CheckBox _showTrayIconCheck;
     private readonly AppConfig _config;
 
     private bool _listeningForHotkey;
@@ -21,7 +22,7 @@ public class SettingsForm : Form
     {
         _config = config;
         Text = "设置 - Translator";
-        Size = new Size(420, 380);
+        Size = new Size(420, 410);
         StartPosition = FormStartPosition.CenterScreen;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
@@ -101,6 +102,17 @@ public class SettingsForm : Form
         };
         Controls.Add(_showInTaskbarCheck);
 
+        y += 28;
+        _showTrayIconCheck = new CheckBox
+        {
+            Text = "显示系统托盘图标",
+            Location = new Point(14, y),
+            Size = new Size(200, 24),
+            Checked = config.ShowTrayIcon,
+            Font = new Font("Microsoft YaHei", 9)
+        };
+        Controls.Add(_showTrayIconCheck);
+
         y += 30;
         Controls.Add(new Label { Text = "通知时长 (毫秒):", Location = new Point(14, y + 4), Size = new Size(110, 20) });
         _durationUpDown = new NumericUpDown
@@ -165,6 +177,7 @@ public class SettingsForm : Form
         _config.YoudaoSecretKey = _youdaoKeyBox.Text.Trim();
         _config.NotificationDurationMs = (int)_durationUpDown.Value;
         _config.ShowInTaskbar = _showInTaskbarCheck.Checked;
+        _config.ShowTrayIcon = _showTrayIconCheck.Checked;
 
         ConfigManager.Save(_config);
         ConfigManager.OnConfigChanged();

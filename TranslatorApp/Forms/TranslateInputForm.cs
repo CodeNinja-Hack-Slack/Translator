@@ -71,7 +71,18 @@ public class TranslateInputForm : Form
         _taskbarCheck.CheckedChanged += (_, _) =>
             Program.MainFormRef?.SetTaskbarMode(_taskbarCheck.Checked);
 
-        Controls.AddRange(new Control[] { _sourceLabel, _inputBox, _translateButton, _resultLabel, _taskbarCheck });
+        var settingsLink = new LinkLabel
+        {
+            Text = "设置",
+            Location = new Point(200, 346),
+            Size = new Size(50, 24),
+            Font = new Font("Microsoft YaHei", 9),
+            Anchor = AnchorStyles.Bottom | AnchorStyles.Left,
+            LinkColor = Color.Gray
+        };
+        settingsLink.LinkClicked += (_, _) => Program.MainFormRef?.ShowSettings();
+
+        Controls.AddRange(new Control[] { _sourceLabel, _inputBox, _translateButton, _resultLabel, _taskbarCheck, settingsLink });
 
         _translateButton.Click += async (_, _) => await DoTranslate();
         _inputBox.KeyDown += (_, e) =>

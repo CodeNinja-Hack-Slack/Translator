@@ -37,7 +37,9 @@ public class MainForm : Form
         _tray = new TrayIcon();
         _tray.ShowClicked += (_, _) => ShowInputForm();
         _tray.SettingsClicked += (_, _) => ShowSettings();
+        _tray.HideClicked += (_, _) => HideAll();
         _tray.ExitClicked += (_, _) => Exit();
+        _tray.SetVisible(_config.ShowTrayIcon);
 
         ConfigManager.ConfigChanged += OnConfigChanged;
 
@@ -95,6 +97,13 @@ public class MainForm : Form
         base.WndProc(ref m);
     }
 
+    private void HideAll()
+    {
+        if (_inputForm != null && !_inputForm.IsDisposed)
+            _inputForm.Hide();
+        WindowState = FormWindowState.Minimized;
+    }
+
     private void ToggleTaskbarClick()
     {
         if (_inputForm != null && !_inputForm.IsDisposed && _inputForm.Visible)
@@ -136,7 +145,7 @@ public class MainForm : Form
         return await _translator.TranslateAsync(text);
     }
 
-    private void ShowSettings()
+    public void ShowSettings()
     {
         if (_settingsForm == null || _settingsForm.IsDisposed)
         {
@@ -158,6 +167,7 @@ public class MainForm : Form
     {
         ConfigManager.Save(_config);
         ApplyIconMode();
+        _tray.SetVisible(_config.ShowTrayIcon);
     }
 
     private void Exit()

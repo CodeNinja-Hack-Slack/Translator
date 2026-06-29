@@ -11,6 +11,7 @@ public class TrayIcon : IDisposable
 
     public event EventHandler? ShowClicked;
     public event EventHandler? SettingsClicked;
+    public event EventHandler? HideClicked;
     public event EventHandler? ExitClicked;
 
     public NotifyIcon NotifyIcon => _notifyIcon;
@@ -37,10 +38,21 @@ public class TrayIcon : IDisposable
 
         _menu.Items.Add(new ToolStripSeparator());
 
-        var miExit = _menu.Items.Add("退出");
+        var miHide = _menu.Items.Add("隐藏");
+        miHide.Click += (_, _) => HideClicked?.Invoke(this, EventArgs.Empty);
+
+        _menu.Items.Add(new ToolStripSeparator());
+
+        var miExit = _menu.Items.Add("完全退出");
         miExit.Click += (_, _) => ExitClicked?.Invoke(this, EventArgs.Empty);
+        miExit.ForeColor = Color.DimGray;
 
         _notifyIcon.ContextMenuStrip = _menu;
+    }
+
+    public void SetVisible(bool visible)
+    {
+        _notifyIcon.Visible = visible;
     }
 
     public void ShowNotification(string title, string text, int durationMs = 3000)

@@ -45,7 +45,6 @@ public class TrayIcon : IDisposable
 
         var miExit = _menu.Items.Add("完全退出");
         miExit.Click += (_, _) => ExitClicked?.Invoke(this, EventArgs.Empty);
-        miExit.ForeColor = Color.DimGray;
 
         _notifyIcon.ContextMenuStrip = _menu;
     }

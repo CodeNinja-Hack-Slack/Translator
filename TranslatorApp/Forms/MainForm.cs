@@ -87,9 +87,14 @@ public class MainForm : Form
         if (m.Msg == 0x0112 && _config.ShowInTaskbar) // WM_SYSCOMMAND
         {
             var cmd = m.WParam.ToInt32() & 0xFFF0;
-            if (cmd == 0xF120) // SC_RESTORE
+            if (cmd == 0xF120) // SC_RESTORE — taskbar click
             {
                 BeginInvoke(new Action(ToggleTaskbarClick));
+                return;
+            }
+            if (cmd == 0xF060) // SC_CLOSE — taskbar right-click → close
+            {
+                BeginInvoke(new Action(Exit));
                 return;
             }
         }

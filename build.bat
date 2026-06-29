@@ -30,8 +30,6 @@ dotnet publish "%~dp0TranslatorApp\TranslatorApp.csproj" ^
     --self-contained true ^
     -r win-x64 ^
     -o "%~dp0dist" ^
-    /p:PublishSingleFile=true ^
-    /p:IncludeNativeLibrariesForSelfExtract=true ^
     /p:DebugType=None ^
     /p:Optimize=true
 

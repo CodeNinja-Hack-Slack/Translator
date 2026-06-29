@@ -57,8 +57,6 @@ if ($SelfContained) {
         --self-contained true `
         -r win-x64 `
         -o $OutputDir `
-        /p:PublishSingleFile=true `
-        /p:IncludeNativeLibrariesForSelfExtract=true `
         /p:DebugType=None `
         /p:Optimize=true 2>&1
 
@@ -77,7 +75,6 @@ if ($SelfContained) {
     & $DotNetExe publish $ProjectFile `
         -c Release `
         -o $OutputDir `
-        /p:PublishSingleFile=true `
         /p:DebugType=None 2>&1
 
     if ($LASTEXITCODE -ne 0) {

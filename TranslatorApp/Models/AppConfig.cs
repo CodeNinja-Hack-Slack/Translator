@@ -12,6 +12,6 @@ public class AppConfig
 
     public int HotkeyModifiers { get; set; } = 1;
     public int HotkeyKey { get; set; } = 0x43;
-    public bool ShowInTaskbar { get; set; } = false;
+    public bool ShowInTaskbar { get; set; } = true;
     public bool ShowTrayIcon { get; set; } = true;
 }

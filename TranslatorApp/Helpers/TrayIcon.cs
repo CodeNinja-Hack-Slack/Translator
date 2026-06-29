@@ -1,6 +1,7 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
+using System.Runtime.InteropServices;
 
 namespace TranslatorApp.Helpers;
 
@@ -61,9 +62,12 @@ public class TrayIcon : IDisposable
 
     private static Icon CreateIcon() => GenerateIcon(16);
 
+    [DllImport("user32.dll")]
+    private static extern bool DestroyIcon(IntPtr hIcon);
+
     public static Icon GenerateIcon(int size)
     {
-        var bitmap = new Bitmap(size, size);
+        using var bitmap = new Bitmap(size, size);
         using var g = Graphics.FromImage(bitmap);
         g.Clear(Color.Transparent);
         g.SmoothingMode = SmoothingMode.HighQuality;
@@ -105,7 +109,10 @@ public class TrayIcon : IDisposable
         g.DrawString("译", font, textBrush, new RectangleF(-0.5f, 0.5f, s, s), format);
 
         var hIcon = bitmap.GetHicon();
-        return Icon.FromHandle(hIcon);
+        var icon = Icon.FromHandle(hIcon);
+        var owned = (Icon)icon.Clone();
+        DestroyIcon(hIcon);
+        return owned;
     }
 
     public void Dispose()

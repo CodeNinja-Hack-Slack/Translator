@@ -67,7 +67,7 @@ if ($SelfContained) {
 
     # Remove PDB and other extra files
     Remove-Item -Path "$OutputDir\*.pdb" -Force -ErrorAction SilentlyContinue
-    Remove-Item -Path "$OutputDir\*.config" -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "$OutputDir\App.config" -Force -ErrorAction SilentlyContinue
 } else {
     Write-Host "[1/2] 发布框架依赖版本 (Release, 单文件)..." -ForegroundColor Green
     Write-Host ""
